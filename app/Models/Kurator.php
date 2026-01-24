@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Kurator extends Model
 {
@@ -25,5 +26,10 @@ class Kurator extends Model
     public function kafedra(): BelongsTo
     {
         return $this->belongsTo(Kafedra::class);
+    }
+
+    public function groups(): HasMany
+    {
+        return $this->hasMany(Group::class);
     }
 }

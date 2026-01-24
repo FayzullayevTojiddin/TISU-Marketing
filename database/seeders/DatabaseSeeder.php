@@ -18,5 +18,14 @@ class DatabaseSeeder extends Seeder
             'email' => 'super@tisu.uz',
             'password' => "As123456",
         ]);
+
+        $this->call([
+            DekanSeeder::class,
+            KafedraSeeder::class,
+            KuratorSeeder::class,
+            GroupSeeder::class,
+            StudentSeeder::class,
+            StudentPaymentSeeder::class,
+        ]);
     }
 }

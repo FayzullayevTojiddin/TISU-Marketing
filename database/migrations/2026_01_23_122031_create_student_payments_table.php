@@ -11,6 +11,10 @@ return new class extends Migration
         Schema::create('student_payments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('student_id')->constrained()->nullOnDelete();
+            $table->string('image')->nullable();
+            $table->dateTime('date')->nullable();
+            $table->bigInteger('amount')->default(0);
+            $table->string('type')->default('plus');
             $table->text('description')->nullable();
             $table->timestamps();
         });

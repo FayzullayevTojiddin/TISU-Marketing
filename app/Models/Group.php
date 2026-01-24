@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\GroupType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -13,6 +14,10 @@ class Group extends Model
         'title',
         'type',
         'contract_price'
+    ];
+
+    protected $casts = [
+        'type' => GroupType::class
     ];
 
     public function kurator(): BelongsTo
