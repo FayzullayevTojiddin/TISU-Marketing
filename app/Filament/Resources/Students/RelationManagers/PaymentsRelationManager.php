@@ -111,8 +111,8 @@ class PaymentsRelationManager extends RelationManager
                 CreateAction::make()->label('Yangi to‘lov qo‘shish'),
             ])
             ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
+                EditAction::make()->button(),
+                DeleteAction::make()->button(),
             ]);
     }
 }

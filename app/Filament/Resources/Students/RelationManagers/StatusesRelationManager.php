@@ -2,15 +2,10 @@
 
 namespace App\Filament\Resources\Students\RelationManagers;
 
-use Filament\Actions\AssociateAction;
-use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\DissociateAction;
-use Filament\Actions\DissociateBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
@@ -22,38 +17,44 @@ class StatusesRelationManager extends RelationManager
 
     protected static ?string $title = 'Holatlar';
 
-    protected static ?string $emptyStateHeading = "Talabaning holatlari mavjud emas";
-    protected static ?string $emptyStateDescription = "Boshlash uchun talaba holatini qo‘shing";
+    protected static ?string $emptyStateHeading = 'Talabaning holatlari mavjud emas';
+    protected static ?string $emptyStateDescription = 'Boshlash uchun talaba holatini qo‘shing';
 
     public function form(Schema $schema): Schema
     {
-        return $schema
-            ->components([
-                TextInput::make('id')
-                    ->required()
-                    ->maxLength(255),
-            ]);
+        return $schema->components([
+            Textarea::make('description')
+                ->label('Holat tavsifi')
+                ->required()
+                ->maxLength(1000)
+                ->columnSpanFull(),
+        ]);
     }
 
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('id')
+            ->recordTitleAttribute('description')
             ->columns([
                 TextColumn::make('id')
+                    ->label('ID')
+                    ->sortable()
+                    ->alignCenter(),
+
+                TextColumn::make('description')
+                    ->label('Holat')
+                    ->wrap()
                     ->searchable(),
-            ])
-            ->filters([
-                //
+                TextColumn::make('created_at')
+                    ->label('Yaratilgan vaqti')
+                    ->dateTime('d.m.Y H:i'),
             ])
             ->headerActions([
-                CreateAction::make()
+                CreateAction::make(),
             ])
             ->recordActions([
-                //
-            ])
-            ->toolbarActions([
-                //
+                EditAction::make()->button(),
+                DeleteAction::make()->button(),
             ]);
     }
 }
