@@ -61,7 +61,8 @@ class PaymentsRelationManager extends RelationManager
                                     ->mapWithKeys(fn ($case) => [$case->value => $case->label()])
                                     ->toArray()
                             )
-                            ->required(),
+                            ->required()
+                            ->default(PaymentType::PLUS),
 
                         Textarea::make('description')
                             ->label('To‘lov tavsifi')
@@ -80,18 +81,6 @@ class PaymentsRelationManager extends RelationManager
             ->paginated(false)
             ->recordTitleAttribute('id')
             ->columns([
-
-                TextColumn::make('id')
-                    ->label('ID')
-                    ->sortable(),
-
-                ImageColumn::make('image')
-                    ->label('Rasm')
-                    ->disk('public')
-                    ->height(40)
-                    ->width(40)
-                    ->circular(),
-
                 TextColumn::make('description')
                     ->label('Tavsif')
                     ->limit(50)

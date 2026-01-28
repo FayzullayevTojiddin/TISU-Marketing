@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\Groups\Schemas;
 
 use App\Enums\GroupType;
+use App\Models\Dekan;
+use App\Models\Kafedra;
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
@@ -40,24 +42,25 @@ class GroupForm
                     ->schema([
                         Select::make('dekan_id')
                             ->label('Dekan')
-                            ->relationship('kurator.kafedra.dekan', 'title')
-                            ->searchable()
-                            ->preload()
+                            ->options(Dekan::pluck('title', 'id'))
                             ->reactive()
-                            ->required(),
+                            ->required()
+                            ->afterStateHydrated(function (callable $set, $record) {
+                                if (!$record?->kurator) return;
+                                $set('dekan_id', $record->kurator->kafedra->dekan_id);
+                            }),
 
                         Select::make('kafedra_id')
                             ->label('Kafedra')
-                            ->relationship(
-                                'kurator.kafedra',
-                                'title',
-                                fn ($query, callable $get) =>
-                                    $query->where('dekan_id', $get('dekan_id'))
+                            ->options(fn (callable $get) =>
+                                $get('dekan_id') ? Kafedra::where('dekan_id', $get('dekan_id'))->pluck('title', 'id') : []
                             )
-                            ->searchable()
-                            ->preload()
                             ->reactive()
-                            ->required(),
+                            ->required()
+                            ->afterStateHydrated(function (callable $set, $record) {
+                                if (!$record?->kurator) return;
+                                $set('kafedra_id', $record->kurator->kafedra_id);
+                            }),
 
                         Select::make('kurator_id')
                             ->label('Kurator')
@@ -65,11 +68,9 @@ class GroupForm
                                 'kurator',
                                 'id',
                                 fn ($query, callable $get) =>
-                                    $query->where('kafedra_id', $get('kafedra_id'))
+                                    $get('kafedra_id') ? $query->where('kafedra_id', $get('kafedra_id')) : $query
                             )
-                            ->getOptionLabelFromRecordUsing(
-                                fn ($record) => $record->user->name
-                            )
+                            ->getOptionLabelFromRecordUsing(fn ($record) => $record->user->name)
                             ->searchable()
                             ->preload()
                             ->required(),

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Students\Tables;
 
+use App\Enums\PaymentType;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -15,7 +16,6 @@ class StudentsTable
     {
         return $table
             ->columns([
-
                 TextColumn::make('id')
                     ->label('ID')
                     ->sortable(),
@@ -32,11 +32,25 @@ class StudentsTable
                     ->label('Guruh')
                     ->searchable(),
 
-                IconColumn::make('status')
-                    ->label('Holati')
-                    ->boolean()
-                    ->trueIcon('heroicon-o-check-circle')
-                    ->falseIcon('heroicon-o-x-circle'),
+                TextColumn::make('contract_percent')
+                    ->label("Kontrakt (%)")
+                    ->state(function ($record) {
+                        $contractPrice = $record->group?->contract_price ?? 0;
+
+                        if ($contractPrice == 0) {
+                            return '0%';
+                        }
+
+                        $paid = $record->payments->sum(function ($payment) {
+                            return $payment->type === PaymentType::PLUS
+                                ? $payment->amount
+                                : -$payment->amount;
+                        });
+                        $percent = ($paid / $contractPrice) * 100;
+                        return number_format(max($percent, 0), 1) . '%';
+                    })
+                    ->sortable()
+                    ->alignCenter(),
 
                 TextColumn::make('created_at')
                     ->label('Yaratilgan sana')

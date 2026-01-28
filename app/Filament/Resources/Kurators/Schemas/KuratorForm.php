@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Kurators\Schemas;
 
+use App\Models\Dekan;
 use App\Models\User;
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\TextInput;
@@ -19,19 +20,36 @@ class KuratorForm
                     ->schema([
                         TextInput::make('user.name')
                             ->label('Ism familiya')
-                            ->required(),
+                            ->required()
+                            ->maxLength(255)
+                            ->afterStateHydrated(function (callable $set, $record) {
+                                if (!$record?->user) return;
+
+                                $set('user.name', $record->user->name);
+                            }),
 
                         TextInput::make('user.email')
                             ->label('Email')
                             ->email()
-                            ->required(),
+                            ->required()
+                            ->afterStateHydrated(function (callable $set, $record) {
+                                if (!$record?->user) return;
+
+                                $set('user.email', $record->user->email);
+                            })
+                            ->unique(
+                                table: 'users',
+                                column: 'email',
+                                ignorable: fn ($record) => $record?->user
+                            ),
 
                         TextInput::make('user.password')
                             ->label('Parol')
                             ->password()
                             ->required()
                             ->dehydrateStateUsing(fn ($state) => bcrypt($state))
-                            ->columnSpanFull(),
+                            ->columnSpanFull()
+                            ->hiddenOn('edit'),
 
                         Hidden::make('user.role')
                             ->default('kurator'),
@@ -42,11 +60,14 @@ class KuratorForm
                     ->schema([
                         Select::make('dekan_id')
                             ->label('Dekan')
-                            ->relationship('kafedra.dekan', 'title')
-                            ->searchable()
-                            ->preload()
+                            ->options(Dekan::pluck('title', 'id'))
                             ->reactive()
-                            ->required(),
+                            ->required()
+                            ->afterStateHydrated(function (callable $set, $record) {
+                                if (!$record?->kafedra) return;
+                                $set('dekan_id', $record->kafedra->dekan_id);
+                            })
+                            ->afterStateUpdated(fn (callable $set) => $set('kafedra_id', null)),
 
                         Select::make('kafedra_id')
                             ->label('Kafedra')
@@ -54,7 +75,9 @@ class KuratorForm
                                 'kafedra',
                                 'title',
                                 fn ($query, callable $get) =>
-                                    $query->where('dekan_id', $get('dekan_id'))
+                                    $get('dekan_id')
+                                        ? $query->where('dekan_id', $get('dekan_id'))
+                                        : $query
                             )
                             ->searchable()
                             ->preload()

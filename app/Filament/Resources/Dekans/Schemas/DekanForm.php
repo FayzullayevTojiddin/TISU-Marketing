@@ -18,13 +18,27 @@ class DekanForm
                         TextInput::make('user.name')
                             ->label('Ism familiya')
                             ->required()
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->afterStateHydrated(function (callable $set, $record) {
+                                if (!$record?->user) return;
+
+                                $set('user.name', $record->user->name);
+                            }),
 
                         TextInput::make('user.email')
                             ->label('Email')
                             ->email()
                             ->required()
-                            ->unique(ignoreRecord: true),
+                            ->afterStateHydrated(function (callable $set, $record) {
+                                if (!$record?->user) return;
+
+                                $set('user.email', $record->user->email);
+                            })
+                            ->unique(
+                                table: 'users',
+                                column: 'email',
+                                ignorable: fn ($record) => $record?->user
+                            ),
 
                         TextInput::make('user.password')
                             ->label('Parol')

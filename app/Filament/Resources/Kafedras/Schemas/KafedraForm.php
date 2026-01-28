@@ -19,19 +19,36 @@ class KafedraForm
                     ->schema([
                         TextInput::make('user.name')
                             ->label('Ism familiya')
-                            ->required(),
+                            ->required()
+                            ->maxLength(255)
+                            ->afterStateHydrated(function (callable $set, $record) {
+                                if (!$record?->user) return;
+
+                                $set('user.name', $record->user->name);
+                            }),
 
                         TextInput::make('user.email')
                             ->label('Email')
                             ->email()
-                            ->required(),
+                            ->required()
+                            ->afterStateHydrated(function (callable $set, $record) {
+                                if (!$record?->user) return;
+
+                                $set('user.email', $record->user->email);
+                            })
+                            ->unique(
+                                table: 'users',
+                                column: 'email',
+                                ignorable: fn ($record) => $record?->user
+                            ),
 
                         TextInput::make('user.password')
                             ->label('Parol')
                             ->password()
                             ->required()
                             ->dehydrateStateUsing(fn ($state) => bcrypt($state))
-                            ->columnSpanFull(),
+                            ->columnSpanFull()
+                            ->hiddenOn('edit'),
 
                         Hidden::make('user.role')
                             ->default('kafedra'),

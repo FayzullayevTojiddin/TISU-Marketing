@@ -36,11 +36,6 @@ class StatusesRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('description')
             ->columns([
-                TextColumn::make('id')
-                    ->label('ID')
-                    ->sortable()
-                    ->alignCenter(),
-
                 TextColumn::make('description')
                     ->label('Holat')
                     ->wrap()

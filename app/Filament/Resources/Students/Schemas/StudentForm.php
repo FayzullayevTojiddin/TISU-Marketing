@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Students\Schemas;
 
+use App\Models\Group;
+use Filament\Forms\Components\Placeholder;
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
@@ -44,7 +46,27 @@ class StudentForm
                             ->relationship('group', 'title')
                             ->searchable()
                             ->preload()
+                            ->reactive()
                             ->required(),
+
+                        Placeholder::make('contract_price')
+                            ->label('Kontrakt narxi')
+                            ->content(function (callable $get) {
+                                $groupId = $get('group_id');
+
+                                if (! $groupId) {
+                                    return '—';
+                                }
+
+                                return number_format(
+                                    Group::find($groupId)?->contract_price ?? 0,
+                                    0,
+                                    '.',
+                                    ' '
+                                ) . " so'm";
+                            })
+                            ->visible(fn (callable $get) => filled($get('group_id')))
+                            ->alignCenter(),
                     ]),
             ]);
     }
