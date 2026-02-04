@@ -17,6 +17,7 @@ class ContractType extends Model
 
     protected $casts = [
         'status' => 'boolean',
+        'keys' => 'array'
     ];
 
     public function studentContracts(): HasMany

@@ -2,10 +2,13 @@
 
 namespace Database\Seeders;
 
-use App\Enums\GroupType;
 use App\Models\Group;
 use App\Models\Kurator;
+use App\Models\StudyForm;
+use App\Models\EducationLevel;
+use App\Models\Direction;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class GroupSeeder extends Seeder
 {
@@ -14,25 +17,106 @@ class GroupSeeder extends Seeder
         $kurators = Kurator::all();
 
         if ($kurators->isEmpty()) {
-            $this->command->warn('Kuratorlar topilmadi. Avval KuratorSeeder ishlating.');
+            $this->command->warn('❌ Kuratorlar topilmadi. Avval KuratorSeeder ishlating.');
             return;
         }
 
-        $types = GroupType::cases();
+        $educationLevelTitles = [
+            'Bakalavr',
+            'Magistr',
+            'Ordinatura',
+            'Doktorantura',
+            'Ikkinchi mutaxassislik',
+        ];
 
-        foreach ($kurators as $kurator) {
+        $educationLevels = collect();
 
-            $type = fake()->randomElement($types);
+        foreach ($educationLevelTitles as $title) {
+            $educationLevels->push(
+                EducationLevel::create([
+                    'title' => $title,
+                    'status' => true,
+                ])
+            );
+        }
 
-            for ($i = 1; $i <= 3; $i++) {
+        $studyFormTitles = [
+            'Kunduzgi',
+            'Sirtqi',
+            'Kechki',
+            'Masofaviy',
+            'Ikkinchi mutaxassislik',
+            'Dual',
+            'Modul',
+            'Onlayn',
+            'Aralash',
+            'Eksternat',
+        ];
 
-                Group::create([
-                    'kurator_id' => $kurator->id,
-                    'title' => "Guruh {$kurator->id}-{$i}",
-                    'type' => $type,
-                    'contract_price' => fake()->numberBetween(5_000_000, 15_000_000),
-                ]);
+        $studyForms = collect();
+
+        foreach ($studyFormTitles as $title) {
+            $studyForms->push(
+                StudyForm::create([
+                    'title' => $title,
+                    'status' => true,
+                ])
+            );
+        }
+
+         $directions = collect();
+        $usedCodes = [];
+
+        foreach ($educationLevels as $level) {
+            foreach ($studyForms as $form) {
+
+                $count = rand(10, 20);
+
+                for ($i = 1; $i <= $count; $i++) {
+
+                    do {
+                        $code = fake()->numerify('########');
+                    } while (in_array($code, $usedCodes));
+
+                    $usedCodes[] = $code;
+
+                    $directions->push(
+                        Direction::create([
+                            'title' => fake()->unique()->jobTitle(),
+                            'code' => $code,
+                            'contract_price' => fake()->numberBetween(6_000_000, 20_000_000),
+                        ])
+                    );
+                }
             }
         }
+
+        for ($i = 1; $i <= 1000; $i++) {
+
+            $direction = $directions->random();
+            $year = fake()->numberBetween(2020, now()->year);
+
+            $key = $direction->id . '-' . $year;
+
+
+            if (! isset($titleCounters[$key])) {
+                $titleCounters[$key] = 1;
+            }
+
+            $index = $titleCounters[$key]++;
+
+            Group::create([
+                'status' => fake()->boolean(95),
+                'kurator_id' => $kurators->random()->id,
+                'education_level_id' => $educationLevels->random()->id,
+                'study_form_id' => $studyForms->random()->id,
+                'direction_id' => $direction->id,
+                'enrollment_year' => $year,
+
+                'title' => 'GROUP-' . Str::random(10),
+            ]);
+        }
+
+        $this->command->info('✅ UniversitySeeder: hamma maʼlumotlar muvaffaqiyatli yaratildi!');
     }
 }

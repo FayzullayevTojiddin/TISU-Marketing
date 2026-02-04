@@ -25,7 +25,7 @@ class DatabaseSeeder extends Seeder
             KuratorSeeder::class,
             GroupSeeder::class,
             StudentSeeder::class,
-            StudentPaymentSeeder::class,
+            // StudentPaymentSeeder::class,
         ]);
     }
 }

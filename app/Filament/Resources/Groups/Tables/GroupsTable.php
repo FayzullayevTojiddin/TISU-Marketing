@@ -2,12 +2,11 @@
 
 namespace App\Filament\Resources\Groups\Tables;
 
-use App\Enums\GroupType;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\SelectFilter;
 
 class GroupsTable
 {
@@ -24,34 +23,46 @@ class GroupsTable
                     ->label('Guruh nomi')
                     ->searchable(),
 
-                TextColumn::make('type')
-                    ->label('Taʼlim turi')
-                    ->formatStateUsing(fn ($state) => $state?->label())
+                TextColumn::make('educationLevel.title')
+                    ->label('Bosqich')
                     ->sortable(),
 
-                TextColumn::make('kurator.user.name')
-                    ->label('Kurator')
-                    ->searchable(),
+                TextColumn::make('studyForm.title')
+                    ->label('Ta`lim turi')
+                    ->sortable(),
+
+                TextColumn::make('direction.title')
+                    ->label('Yo`nalish')
+                    ->sortable(),
 
                 TextColumn::make('students_count')
-                    ->label('Talabalar')
+                    ->label('Talabalarning soni')
                     ->counts('students')
                     ->alignCenter()
                     ->sortable(),
-
-                TextColumn::make('contract_price')
-                    ->label('Kontrakt narxi')
-                    ->money('UZS')
-                    ->sortable(),
-
-                TextColumn::make('created_at')
-                    ->label('Yaratilgan sana')
-                    ->dateTime('d.m.Y H:i')
-                    ->sortable(),
             ])
             ->filters([
-                //
+                SelectFilter::make('education_level_id')
+                    ->label('Bosqich')
+                    ->relationship('educationLevel', 'title')
+                    ->searchable()
+                    ->preload(),
+
+                SelectFilter::make('study_form_id')
+                    ->label('Taʼlim turi')
+                    ->relationship('studyForm', 'title')
+                    ->searchable()
+                    ->preload(),
+
+                SelectFilter::make('direction_id')
+                    ->label('Yoʻnalish')
+                    ->relationship('direction', 'title')
+                    ->searchable()
+                    ->preload(),
             ])
+            ->filtersLayout(FiltersLayout::AboveContent)
+            ->filtersFormColumns(3)
+            ->filtersApplyAction(fn ($action) => $action->hidden())
             ->recordActions([
                 EditAction::make()
                     ->button(),

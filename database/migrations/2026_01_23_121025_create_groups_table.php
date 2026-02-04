@@ -11,9 +11,12 @@ return new class extends Migration
         Schema::create('groups', function (Blueprint $table) {
             $table->id();
             $table->foreignId('kurator_id')->constrained()->nullOnDelete();
+            $table->foreignId('study_form_id')->constrained()->nullOnDelete();
+            $table->foreignId('education_level_id')->constrained()->nullOnDelete();
+            $table->foreignId('direction_id')->constrained()->nullOnDelete();
             $table->string('title')->unique();
-            $table->string('type');
-            $table->string('contract_price');
+            $table->integer('enrollment_year')->nullable();
+            $table->boolean('status')->default(false);
             $table->timestamps();
         });
     }

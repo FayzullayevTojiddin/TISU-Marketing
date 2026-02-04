@@ -18,28 +18,45 @@ class StudentForm
 
                 Section::make('Talaba maʼlumotlari')
                     ->schema([
-
                         TextInput::make('full_name')
                             ->label('F.I.Sh')
                             ->required()
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->columnSpan(3),
 
                         TextInput::make('JSHSHR')
                             ->label('JSHSHR')
                             ->required()
                             ->numeric()
-                            ->length(14),
+                            ->length(14)
+                            ->columnSpan(3),
+
+                        Select::make('sex')
+                            ->label('Jinsi')
+                            ->options([
+                                'male' => 'Erkak',
+                                'female' => 'Ayol',
+                            ])
+                            ->required()
+                            ->columnSpan(2),
+
+                        TextInput::make('nationality')
+                            ->label('Millati')
+                            ->required()
+                            ->columnSpan(2),
 
                         Select::make('status')
+                            ->label('Holati')
                             ->options([
                                 true => 'Faol',
                                 false => 'Nofaol',
                             ])
-                            ->required(),
+                            ->required()
+                            ->columnSpan(2),
                     ])
-                    ->columns(1),
+                    ->columns(6),
 
-                Section::make('Tashkiliy bog‘lanish')
+                Section::make('O‘qish maʼlumotlari')
                     ->schema([
                         Select::make('group_id')
                             ->label('Guruh')
@@ -67,7 +84,34 @@ class StudentForm
                             })
                             ->visible(fn (callable $get) => filled($get('group_id')))
                             ->alignCenter(),
-                    ]),
+                    ])
+                    ->columns(1),
+
+                Section::make('additional')
+                    ->label("Qo'shimcha Ma'lumotlar")
+                    ->columns(2)
+                    ->columnSpanFull()
+                    ->schema([
+                        Section::make('Manzil maʼlumotlari')
+                            ->schema([
+                                TextInput::make('from.region')
+                                    ->label('Tug‘ilgan viloyat'),
+
+                                TextInput::make('from.city')
+                                    ->label('Tug‘ilgan shahar/tuman'),
+
+                                TextInput::make('lives.region')
+                                    ->label('Yashash viloyati'),
+
+                                TextInput::make('lives.address')
+                                    ->label('Yashash manzili'),
+
+                                TextInput::make('passport_address')
+                                    ->label('Passport bo‘yicha manzil')
+                                    ->columnSpanFull(),
+                            ])
+                            ->columns(2),
+                    ])
             ]);
     }
 }

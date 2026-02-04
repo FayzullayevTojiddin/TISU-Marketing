@@ -10,6 +10,7 @@ class StudentPayment extends Model
 {
     protected $fillable = [
         'student_id',
+        'student_contract_id',
         'image',
         'date',
         'amount',
@@ -24,5 +25,10 @@ class StudentPayment extends Model
     public function student(): BelongsTo
     {
         return $this->belongsTo(Student::class);
+    }
+
+    public function studentContract(): BelongsTo
+    {
+        return $this->belongsTo(StudentContract::class);
     }
 }

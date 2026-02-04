@@ -16,4 +16,11 @@ class ListDekans extends ListRecords
             CreateAction::make(),
         ];
     }
+
+    public function getHeaderWidgets(): array
+    {
+        return [
+            //
+        ];
+    }
 }

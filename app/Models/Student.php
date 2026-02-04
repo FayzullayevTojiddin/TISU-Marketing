@@ -11,8 +11,25 @@ class Student extends Model
     protected $fillable = [
         'group_id',
         'full_name',
+        'sex',
+        'nationality',
+        'birth_date',
+        'from',
+        'lives',
+        'passport_address',
+        'image',
+        'file',
+        'phone_number',
+        'parents_number',
         'JSHSHR',
         'status'
+    ];
+
+    protected $casts = [
+        'from' => 'array',
+        'lives' => 'array',
+        'birth_date' => 'date',
+        'status' => 'boolean',
     ];
 
     public function group(): BelongsTo
@@ -28,5 +45,10 @@ class Student extends Model
     public function statuses(): HasMany
     {
         return $this->hasMany(StudentStatus::class);
+    }
+
+    public function contracts(): HasMany
+    {
+        return $this->hasMany(StudentContract::class);
     }
 }

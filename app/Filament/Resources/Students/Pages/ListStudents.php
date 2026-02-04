@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\Students\Pages;
 
 use App\Filament\Resources\Students\StudentResource;
+use App\Livewire\StudentCoursePieChart;
+use App\Livewire\StudentSatsOverview;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
@@ -14,6 +16,14 @@ class ListStudents extends ListRecords
     {
         return [
             CreateAction::make(),
+        ];
+    }
+
+    public function getHeaderWidgets(): array
+    {
+        return [
+            StudentSatsOverview::class,
+            StudentCoursePieChart::class
         ];
     }
 }

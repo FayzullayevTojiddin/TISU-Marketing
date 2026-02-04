@@ -12,7 +12,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('student_id')->constrained()->cascadeOnDelete();
             $table->foreignId('contract_type_id')->constrained()->cascadeOnDelete();
-            $table->bigInteger('amount')->nullable();
+            $table->json('data')->nullable();
+            $table->string('file_path')->nullable();
+            $table->bigInteger('amount');
             $table->boolean('is_completed')->default(false);
             $table->dateTime('completed_at')->nullable();
             $table->timestamps();
