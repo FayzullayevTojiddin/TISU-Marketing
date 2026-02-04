@@ -2,11 +2,12 @@
 
 namespace App\Filament\Pages;
 
+use App\Models\ContractType;
 use App\Models\Dekan;
 use App\Models\Group;
 use App\Models\Kafedra;
 use App\Models\Kurator;
-use App\Models\Student;
+use App\Models\StudentContract;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -14,6 +15,7 @@ use Filament\Pages\Page;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Cache;
 
 class Dashboard extends Page implements HasForms
 {
@@ -22,6 +24,11 @@ class Dashboard extends Page implements HasForms
     protected static ?string $navigationLabel = 'Statistika';
     protected static ?string $title = 'Statistika';
     protected static ?int $navigationSort = 1;
+
+    public static function getNavigationIcon(): string|\BackedEnum|null
+    {
+        return 'heroicon-o-chart-pie';
+    }
     protected string $view = 'filament.pages.dashboard';
 
     public ?array $filters = [];
@@ -43,7 +50,6 @@ class Dashboard extends Page implements HasForms
                         $set('kafedra_id', null);
                         $set('kurator_id', null);
                         $set('group_id', null);
-                        $set('student_id', null);
                     }),
 
                 Select::make('kafedra_id')
@@ -58,7 +64,6 @@ class Dashboard extends Page implements HasForms
                     ->afterStateUpdated(function (Set $set) {
                         $set('kurator_id', null);
                         $set('group_id', null);
-                        $set('student_id', null);
                     }),
 
                 Select::make('kurator_id')
@@ -73,7 +78,6 @@ class Dashboard extends Page implements HasForms
                     ->live()
                     ->afterStateUpdated(function (Set $set) {
                         $set('group_id', null);
-                        $set('student_id', null);
                     }),
 
                 Select::make('group_id')
@@ -84,87 +88,64 @@ class Dashboard extends Page implements HasForms
                             ->pluck('title', 'id')
                     )
                     ->disabled(fn (Get $get): bool => blank($get('kurator_id')))
-                    ->live()
-                    ->afterStateUpdated(function (Set $set) {
-                        $set('student_id', null);
-                    }),
+                    ->live(),
 
-                Select::make('student_id')
-                    ->label('Talaba')
-                    ->options(fn (Get $get) =>
-                        Student::query()
-                            ->where('group_id', $get('group_id'))
-                            ->pluck('full_name', 'id')
-                    )
-                    ->disabled(fn (Get $get): bool => blank($get('group_id')))
-                    ->searchable(),
+                Select::make('contract_type_id')
+                    ->label('Shartnoma turi')
+                    ->options(ContractType::pluck('title', 'id'))
+                    ->live(),
             ])
-            ->columns(5)
+            ->columns(3)
             ->statePath('filters');
     }
 
-    /**
-     * Filterlar bo'yicha studentlar sonini hisoblash
-     */
-    public function getStudentCount(): int
+    public function getPaymentStats(): array
     {
-        $query = Student::query();
+        $cacheKey = 'dashboard_stats_' . md5(json_encode($this->filters));
 
-        // Aniq talaba tanlangan
-        if (!empty($this->filters['student_id'])) {
-            return 1;
-        }
+        return Cache::remember($cacheKey, now()->addDay(), function () {
+            $query = StudentContract::query();
 
-        // Guruh tanlangan
-        if (!empty($this->filters['group_id'])) {
-            return $query->where('group_id', $this->filters['group_id'])->count();
-        }
+            if (!empty($this->filters['contract_type_id'])) {
+                $query->where('contract_type_id', $this->filters['contract_type_id']);
+            }
 
-        // Kurator tanlangan
-        if (!empty($this->filters['kurator_id'])) {
-            return $query->whereHas('group', function ($q) {
-                $q->where('kurator_id', $this->filters['kurator_id']);
-            })->count();
-        }
+            if (!empty($this->filters['group_id'])) {
+                $query->whereHas('student', fn ($q) => $q->where('group_id', $this->filters['group_id']));
+            } elseif (!empty($this->filters['kurator_id'])) {
+                $query->whereHas('student.group', fn ($q) => $q->where('kurator_id', $this->filters['kurator_id']));
+            } elseif (!empty($this->filters['kafedra_id'])) {
+                $query->whereHas('student.group.kurator', fn ($q) => $q->where('kafedra_id', $this->filters['kafedra_id']));
+            } elseif (!empty($this->filters['dekan_id'])) {
+                $query->whereHas('student.group.kurator.kafedra', fn ($q) => $q->where('dekan_id', $this->filters['dekan_id']));
+            }
 
-        // Kafedra tanlangan
-        if (!empty($this->filters['kafedra_id'])) {
-            return $query->whereHas('group.kurator', function ($q) {
-                $q->where('kafedra_id', $this->filters['kafedra_id']);
-            })->count();
-        }
+            $contracts = $query->with('payments')->get();
 
-        // Dekan tanlangan
-        if (!empty($this->filters['dekan_id'])) {
-            return $query->whereHas('group.kurator.kafedra', function ($q) {
-                $q->where('dekan_id', $this->filters['dekan_id']);
-            })->count();
-        }
+            $stats = [
+                'range_0_25' => 0,
+                'range_25_50' => 0,
+                'range_50_75' => 0,
+                'range_75_100' => 0,
+            ];
 
-        // Hech narsa tanlanmagan - barcha talabalar
-        return $query->count();
-    }
+            foreach ($contracts as $contract) {
+                $percentage = $contract->amount > 0
+                    ? ($contract->payments->sum('amount') / $contract->amount) * 100
+                    : 0;
 
-    /**
-     * Qaysi daraja tanlangan
-     */
-    public function getFilterLevel(): string
-    {
-        if (!empty($this->filters['student_id'])) {
-            return 'Tanlangan talaba';
-        }
-        if (!empty($this->filters['group_id'])) {
-            return 'Guruhdagi talabalar';
-        }
-        if (!empty($this->filters['kurator_id'])) {
-            return 'Kurator talabalari';
-        }
-        if (!empty($this->filters['kafedra_id'])) {
-            return 'Kafedra talabalari';
-        }
-        if (!empty($this->filters['dekan_id'])) {
-            return 'Fakultet talabalari';
-        }
-        return 'Barcha talabalar';
+                if ($percentage >= 75) {
+                    $stats['range_75_100']++;
+                } elseif ($percentage >= 50) {
+                    $stats['range_50_75']++;
+                } elseif ($percentage >= 25) {
+                    $stats['range_25_50']++;
+                } else {
+                    $stats['range_0_25']++;
+                }
+            }
+
+            return $stats;
+        });
     }
 }
