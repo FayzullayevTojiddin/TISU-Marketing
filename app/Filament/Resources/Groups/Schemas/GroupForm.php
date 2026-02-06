@@ -45,12 +45,7 @@ class GroupForm
 
                         Select::make('kurator_id')
                             ->label('Kurator')
-                            ->relationship(
-                                'kurator',
-                                'id',
-                                fn ($query, callable $get) =>
-                                    $get('kafedra_id') ? $query->where('kafedra_id', $get('kafedra_id')) : $query
-                            )
+                            ->relationship('kurator', 'id')
                             ->getOptionLabelFromRecordUsing(fn ($record) => $record->user->name)
                             ->searchable()
                             ->preload()
