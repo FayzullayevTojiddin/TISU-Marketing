@@ -10,6 +10,7 @@ return new class extends Migration
     {
         Schema::create('directions', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('study_form_id')->constrained()->nullOnDelete();
             $table->string('title')->unique();
             $table->bigInteger('code')->unique();
             $table->unsignedBigInteger('contract_price');
