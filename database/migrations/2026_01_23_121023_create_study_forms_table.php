@@ -10,6 +10,7 @@ return new class extends Migration
     {
         Schema::create('study_forms', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('education_level_id')->constrained()->nullOnDelete();
             $table->string('title')->unique();
             $table->boolean('status')->default(false);
             $table->timestamps();
