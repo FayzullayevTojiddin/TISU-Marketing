@@ -25,11 +25,7 @@ class GroupForm
                             ->label('Dekan')
                             ->options(Dekan::pluck('title', 'id'))
                             ->reactive()
-                            ->required()
-                            ->afterStateHydrated(function (callable $set, $record) {
-                                if (!$record?->kurator) return;
-                                $set('dekan_id', $record->kurator->kafedra->dekan_id);
-                            }),
+                            ->required(),
 
                         Select::make('kafedra_id')
                             ->label('Kafedra')
@@ -37,11 +33,7 @@ class GroupForm
                                 $get('dekan_id') ? Kafedra::where('dekan_id', $get('dekan_id'))->pluck('title', 'id') : []
                             )
                             ->reactive()
-                            ->required()
-                            ->afterStateHydrated(function (callable $set, $record) {
-                                if (!$record?->kurator) return;
-                                $set('kafedra_id', $record->kurator->kafedra_id);
-                            }),
+                            ->required(),
 
                         Select::make('kurator_id')
                             ->label('Kurator')
