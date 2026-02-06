@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Group;
+use App\Models\Kafedra;
 use App\Models\Kurator;
 use App\Models\StudyForm;
 use App\Models\EducationLevel;
@@ -15,9 +16,15 @@ class GroupSeeder extends Seeder
     public function run(): void
     {
         $kurators = Kurator::all();
+        $kafedras = Kafedra::all();
 
         if ($kurators->isEmpty()) {
             $this->command->warn('❌ Kuratorlar topilmadi. Avval KuratorSeeder ishlating.');
+            return;
+        }
+
+        if ($kafedras->isEmpty()) {
+            $this->command->warn('❌ Kafedralar topilmadi. Avval KafedraSeeder ishlating.');
             return;
         }
 
@@ -58,6 +65,7 @@ class GroupSeeder extends Seeder
         foreach ($studyFormTitles as $title) {
             $studyForms->push(
                 StudyForm::create([
+                    'education_level_id' => $educationLevels->random()->id,
                     'title' => $title,
                     'status' => true,
                 ])
@@ -82,6 +90,7 @@ class GroupSeeder extends Seeder
 
                     $directions->push(
                         Direction::create([
+                            'study_form_id' => $form->id,
                             'title' => fake()->unique()->jobTitle(),
                             'code' => $code,
                             'contract_price' => fake()->numberBetween(6_000_000, 20_000_000),
@@ -108,8 +117,7 @@ class GroupSeeder extends Seeder
             Group::create([
                 'status' => fake()->boolean(95),
                 'kurator_id' => $kurators->random()->id,
-                'education_level_id' => $educationLevels->random()->id,
-                'study_form_id' => $studyForms->random()->id,
+                'kafedra_id' => $kafedras->random()->id,
                 'direction_id' => $direction->id,
                 'enrollment_year' => $year,
 
