@@ -10,10 +10,9 @@ class Group extends Model
 {
     protected $fillable = [
         'kurator_id',
-        'title',
-        'education_level_id',
-        'study_form_id',
+        'kafedra_id',
         'direction_id',
+        'title',
         'enrollment_year',
         'status',
     ];
@@ -23,14 +22,9 @@ class Group extends Model
         return $this->belongsTo(Kurator::class);
     }
 
-    public function educationLevel(): BelongsTo
+    public function kafedra(): BelongsTo
     {
-        return $this->belongsTo(EducationLevel::class);
-    }
-
-    public function studyForm(): BelongsTo
-    {
-        return $this->belongsTo(StudyForm::class);
+        return $this->belongsTo(Kafedra::class);
     }
 
     public function direction(): BelongsTo

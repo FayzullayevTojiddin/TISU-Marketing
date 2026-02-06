@@ -29,8 +29,8 @@ class Kafedra extends Model
         return $this->belongsTo(Dekan::class);
     }
 
-    public function kurators(): HasMany
+    public function groups(): HasMany
     {
-        return $this->hasMany(Kurator::class);
+        return $this->hasMany(Group::class);
     }
 }
