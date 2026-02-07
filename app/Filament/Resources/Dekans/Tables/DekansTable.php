@@ -2,8 +2,7 @@
 
 namespace App\Filament\Resources\Dekans\Tables;
 
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
+use App\Models\Student;
 use Filament\Actions\EditAction;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
@@ -19,18 +18,43 @@ class DekansTable
                     ->label('ID')
                     ->sortable(),
 
-                TextColumn::make('user.email')
-                    ->label('Email')
-                    ->searchable(),
-
                 TextColumn::make('title')
-                    ->label('Lavozim')
+                    ->label('Fakultet')
                     ->default('-'),
 
                 TextColumn::make('kafedras_count')
-                    ->label('Kafedralar soni')
+                    ->label('Kafedralar')
                     ->counts('kafedras')
                     ->sortable()
+                    ->alignCenter(),
+
+                TextColumn::make('kurators_count')
+                    ->label('Kuratorlar')
+                    ->getStateUsing(fn ($record) =>
+                        $record->kafedras()
+                            ->withCount('kurators')
+                            ->get()
+                            ->sum('kurators_count')
+                    )
+                    ->alignCenter(),
+
+                TextColumn::make('groups_count')
+                    ->label('Guruhlar')
+                    ->getStateUsing(fn ($record) =>
+                        $record->kafedras()
+                            ->withCount('groups')
+                            ->get()
+                            ->sum('groups_count')
+                    )
+                    ->alignCenter(),
+
+                TextColumn::make('students_count')
+                    ->label('Talabalar')
+                    ->getStateUsing(fn ($record) =>
+                        Student::whereHas('group.kafedra', fn ($q) =>
+                            $q->where('dekan_id', $record->id)
+                        )->count()
+                    )
                     ->alignCenter(),
 
                 TextColumn::make('created_at')
@@ -43,10 +67,10 @@ class DekansTable
             ])
             ->recordActions([
                 EditAction::make()
-                    ->button(),
+                    ->iconButton(),
             ])
             ->toolbarActions([
-               //
+                //
             ]);
     }
 }

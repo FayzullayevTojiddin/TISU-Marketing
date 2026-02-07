@@ -10,7 +10,8 @@ return new class extends Migration
     {
         Schema::create('directions', function (Blueprint $table) {
             $table->id();
-            $table->string('title')->unique();
+            $table->foreignId('study_form_id')->constrained()->cascadeOnDelete();
+            $table->string('title');
             $table->bigInteger('code')->unique();
             $table->unsignedBigInteger('contract_price');
             $table->timestamps();

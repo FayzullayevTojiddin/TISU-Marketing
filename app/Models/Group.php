@@ -11,9 +11,8 @@ class Group extends Model
     protected $fillable = [
         'kurator_id',
         'title',
-        'education_level_id',
-        'study_form_id',
         'direction_id',
+        'kafedra_id',
         'enrollment_year',
         'status',
     ];
@@ -21,16 +20,6 @@ class Group extends Model
     public function kurator(): BelongsTo
     {
         return $this->belongsTo(Kurator::class);
-    }
-
-    public function educationLevel(): BelongsTo
-    {
-        return $this->belongsTo(EducationLevel::class);
-    }
-
-    public function studyForm(): BelongsTo
-    {
-        return $this->belongsTo(StudyForm::class);
     }
 
     public function direction(): BelongsTo
@@ -41,5 +30,10 @@ class Group extends Model
     public function students(): HasMany
     {
         return $this->hasMany(Student::class);
+    }
+
+    public function kafedra(): BelongsTo
+    {
+        return $this->belongsTo(Kafedra::class);
     }
 }

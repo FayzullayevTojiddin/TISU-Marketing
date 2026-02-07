@@ -69,10 +69,11 @@ class Dashboard extends Page implements HasForms
                 Select::make('kurator_id')
                     ->label('Kurator')
                     ->options(fn (Get $get) =>
-                        Kurator::query()
+                        Kafedra::find($get('kafedra_id'))
+                            ?->kurators()
                             ->join('users', 'users.id', '=', 'kurators.user_id')
-                            ->where('kurators.kafedra_id', $get('kafedra_id'))
                             ->pluck('users.name', 'kurators.id')
+                            ?? []
                     )
                     ->disabled(fn (Get $get): bool => blank($get('kafedra_id')))
                     ->live()
@@ -85,6 +86,7 @@ class Dashboard extends Page implements HasForms
                     ->options(fn (Get $get) =>
                         Group::query()
                             ->where('kurator_id', $get('kurator_id'))
+                            ->where('kafedra_id', $get('kafedra_id'))
                             ->pluck('title', 'id')
                     )
                     ->disabled(fn (Get $get): bool => blank($get('kurator_id')))
@@ -113,11 +115,14 @@ class Dashboard extends Page implements HasForms
             if (!empty($this->filters['group_id'])) {
                 $query->whereHas('student', fn ($q) => $q->where('group_id', $this->filters['group_id']));
             } elseif (!empty($this->filters['kurator_id'])) {
-                $query->whereHas('student.group', fn ($q) => $q->where('kurator_id', $this->filters['kurator_id']));
+                $query->whereHas('student.group', fn ($q) =>
+                    $q->where('kurator_id', $this->filters['kurator_id'])
+                    ->where('kafedra_id', $this->filters['kafedra_id'])
+                );
             } elseif (!empty($this->filters['kafedra_id'])) {
-                $query->whereHas('student.group.kurator', fn ($q) => $q->where('kafedra_id', $this->filters['kafedra_id']));
+                $query->whereHas('student.group', fn ($q) => $q->where('kafedra_id', $this->filters['kafedra_id']));
             } elseif (!empty($this->filters['dekan_id'])) {
-                $query->whereHas('student.group.kurator.kafedra', fn ($q) => $q->where('dekan_id', $this->filters['dekan_id']));
+                $query->whereHas('student.group.kafedra', fn ($q) => $q->where('dekan_id', $this->filters['dekan_id']));
             }
 
             $contracts = $query->with('payments')->get();

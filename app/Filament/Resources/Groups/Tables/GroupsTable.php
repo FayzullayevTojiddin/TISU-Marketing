@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Groups\Tables;
 
+use App\Models\EducationLevel;
+use App\Models\StudyForm;
 use Filament\Actions\EditAction;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
@@ -23,39 +25,45 @@ class GroupsTable
                     ->label('Guruh nomi')
                     ->searchable(),
 
-                TextColumn::make('educationLevel.title')
-                    ->label('Bosqich')
-                    ->sortable(),
-
-                TextColumn::make('studyForm.title')
-                    ->label('Ta`lim turi')
-                    ->sortable(),
-
-                TextColumn::make('direction.title')
-                    ->label('Yo`nalish')
+                TextColumn::make('kurator.user.name')
+                    ->label('Kurator')
                     ->sortable(),
 
                 TextColumn::make('students_count')
-                    ->label('Talabalarning soni')
+                    ->label('Talabalar')
                     ->counts('students')
                     ->alignCenter()
                     ->sortable(),
             ])
             ->filters([
-                SelectFilter::make('education_level_id')
+                SelectFilter::make('education_level')
                     ->label('Bosqich')
-                    ->relationship('educationLevel', 'title')
+                    ->options(EducationLevel::pluck('title', 'id'))
+                    ->query(fn ($query, array $data) =>
+                        $data['value']
+                            ? $query->whereHas('direction.studyForm', fn ($q) =>
+                                $q->where('education_level_id', $data['value'])
+                            )
+                            : $query
+                    )
                     ->searchable()
                     ->preload(),
 
-                SelectFilter::make('study_form_id')
-                    ->label('Taʼlim turi')
-                    ->relationship('studyForm', 'title')
+                SelectFilter::make('study_form')
+                    ->label('Ta\'lim shakli')
+                    ->options(StudyForm::pluck('title', 'id'))
+                    ->query(fn ($query, array $data) =>
+                        $data['value']
+                            ? $query->whereHas('direction', fn ($q) =>
+                                $q->where('study_form_id', $data['value'])
+                            )
+                            : $query
+                    )
                     ->searchable()
                     ->preload(),
 
                 SelectFilter::make('direction_id')
-                    ->label('Yoʻnalish')
+                    ->label('Yo\'nalish')
                     ->relationship('direction', 'title')
                     ->searchable()
                     ->preload(),
@@ -65,7 +73,7 @@ class GroupsTable
             ->filtersApplyAction(fn ($action) => $action->hidden())
             ->recordActions([
                 EditAction::make()
-                    ->button(),
+                    ->iconButton(),
             ])
             ->toolbarActions([
                 //

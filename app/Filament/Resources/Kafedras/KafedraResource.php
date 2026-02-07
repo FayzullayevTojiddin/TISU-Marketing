@@ -8,6 +8,7 @@ use App\Filament\Resources\Kafedras\Pages\ListKafedras;
 use App\Filament\Resources\Kafedras\RelationManagers\KuratorsRelationManager;
 use App\Filament\Resources\Kafedras\Schemas\KafedraForm;
 use App\Filament\Resources\Kafedras\Tables\KafedrasTable;
+use App\Filament\Resources\Kurators\RelationManagers\GroupsRelationManager;
 use App\Models\Kafedra;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -45,7 +46,8 @@ class KafedraResource extends Resource
     public static function getRelations(): array
     {
         return [
-            KuratorsRelationManager::class
+            KuratorsRelationManager::class,
+            GroupsRelationManager::class
         ];
     }
 

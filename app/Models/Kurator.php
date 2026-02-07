@@ -10,7 +10,6 @@ class Kurator extends Model
 {
     protected $fillable = [
         'user_id',
-        'kafedra_id',
         'details'
     ];
 
@@ -21,11 +20,6 @@ class Kurator extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
-    }
-
-    public function kafedra(): BelongsTo
-    {
-        return $this->belongsTo(Kafedra::class);
     }
 
     public function groups(): HasMany

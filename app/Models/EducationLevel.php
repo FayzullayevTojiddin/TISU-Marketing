@@ -16,8 +16,8 @@ class EducationLevel extends Model
         'status' => 'boolean'
     ];
 
-    public function groups(): HasMany
+    public function studyForms(): HasMany
     {
-        return $this->hasMany(Group::class);
+        return $this->hasMany(StudyForm::class);
     }
 }

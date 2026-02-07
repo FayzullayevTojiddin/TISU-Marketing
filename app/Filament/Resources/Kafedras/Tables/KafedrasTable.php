@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Kafedras\Tables;
 
+use App\Models\Student;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -19,18 +20,28 @@ class KafedrasTable
                     ->label('ID')
                     ->sortable(),
 
-                TextColumn::make('user.email')
-                    ->label('Email')
-                    ->searchable(),
-
                 TextColumn::make('title')
-                    ->label('Lavozim')
-                    ->searchable(),
+                    ->label('Nomi'),
 
                 TextColumn::make('kurators_count')
                     ->label('Kuratorlar')
-                    ->counts('kurators')
-                    ->sortable()
+                    ->getStateUsing(fn ($record) =>
+                        $record->kurators()->count()
+                    )
+                    ->alignCenter(),
+
+                TextColumn::make('groups_count')
+                    ->label('Guruhlar')
+                    ->counts('groups')
+                    ->alignCenter(),
+
+                TextColumn::make('students_count')
+                    ->label('Talabalar')
+                    ->getStateUsing(fn ($record) =>
+                        Student::whereHas('group', fn ($q) =>
+                            $q->where('kafedra_id', $record->id)
+                        )->count()
+                    )
                     ->alignCenter(),
 
                 TextColumn::make('created_at')
@@ -43,7 +54,7 @@ class KafedrasTable
             ])
             ->recordActions([
                 EditAction::make()
-                    ->button(),
+                    ->iconButton(),
             ])
             ->toolbarActions([
                 //

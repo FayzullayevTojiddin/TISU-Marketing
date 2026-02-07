@@ -2,9 +2,11 @@
 
 namespace App\Filament\Resources\Kurators\Tables;
 
+use App\Models\Student;
 use Filament\Actions\EditAction;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
 
 class KuratorsTable
 {
@@ -17,18 +19,27 @@ class KuratorsTable
                     ->label('ID')
                     ->sortable(),
 
-                TextColumn::make('user.email')
-                    ->label('Email')
-                    ->searchable(),
-
-                TextColumn::make('kafedra.title')
-                    ->label('Kafedra')
+                TextColumn::make('user.name')
+                    ->label('F.I.SH')
                     ->searchable(),
 
                 TextColumn::make('groups_count')
                     ->label('Guruhlar')
                     ->counts('groups')
                     ->sortable()
+                    ->alignCenter(),
+
+                TextColumn::make('students_count')
+                    ->label('Talabalar')
+                    ->getStateUsing(fn ($record) =>
+                        Student::whereHas('group', fn ($q) =>
+                            $q->where('kurator_id', $record->id)
+                        )->count()
+                    )
+                    ->alignCenter(),
+
+                ToggleColumn::make('user.status')
+                    ->label('Status')
                     ->alignCenter(),
 
                 TextColumn::make('created_at')
@@ -41,7 +52,7 @@ class KuratorsTable
             ])
             ->recordActions([
                 EditAction::make()
-                    ->button(),
+                    ->iconButton(),
             ])
             ->toolbarActions([
                 //

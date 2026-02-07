@@ -3,10 +3,8 @@
 namespace App\Filament\Resources\Dekans\RelationManagers;
 
 use App\Filament\Resources\Kafedras\KafedraResource;
+use App\Models\Student;
 use Filament\Actions\Action;
-use Filament\Actions\CreateAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\TextInput;
@@ -43,7 +41,23 @@ class KafedrasRelationManager extends RelationManager
 
                 TextColumn::make('kurators_count')
                     ->label('Kuratorlar')
-                    ->counts('kurators')
+                    ->getStateUsing(fn ($record) =>
+                        $record->kurators()->count()
+                    )
+                    ->alignCenter(),
+
+                TextColumn::make('groups_count')
+                    ->label('Guruhlar')
+                    ->counts('groups')
+                    ->alignCenter(),
+
+                TextColumn::make('students_count')
+                    ->label('Talabalar')
+                    ->getStateUsing(fn ($record) =>
+                        Student::whereHas('group', fn ($q) =>
+                            $q->where('kafedra_id', $record->id)
+                        )->count()
+                    )
                     ->alignCenter(),
 
                 TextColumn::make('created_at')
@@ -56,13 +70,13 @@ class KafedrasRelationManager extends RelationManager
             ])
             ->recordActions([
                 Action::make('open_kafedra')
-                    ->label('Kafedraga o‘tish')
+                    ->label('Kafedraga o\'tish')
                     ->icon('heroicon-o-arrow-top-right-on-square')
                     ->url(fn ($record) => KafedraResource::getUrl('edit', [
                         'record' => $record,
                     ]))
                     ->openUrlInNewTab()
-                    ->button(),
+                    ->iconButton(),
             ]);
     }
 }

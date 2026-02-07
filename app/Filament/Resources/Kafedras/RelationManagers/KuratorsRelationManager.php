@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Kafedras\RelationManagers;
 
 use App\Filament\Resources\Kurators\KuratorResource;
+use App\Models\Student;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Actions\EditAction;
@@ -41,6 +42,15 @@ class KuratorsRelationManager extends RelationManager
                 TextColumn::make('groups_count')
                     ->label('Guruhlar')
                     ->counts('groups')
+                    ->alignCenter(),
+
+                TextColumn::make('students_count')
+                    ->label('Talabalar')
+                    ->getStateUsing(fn ($record) =>
+                        Student::whereHas('group', fn ($q) =>
+                            $q->where('kurator_id', $record->id)
+                        )->count()
+                    )
                     ->alignCenter(),
 
                 TextColumn::make('created_at')

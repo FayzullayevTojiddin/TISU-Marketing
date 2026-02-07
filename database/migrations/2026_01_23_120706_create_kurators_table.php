@@ -11,7 +11,6 @@ return new class extends Migration
         Schema::create('kurators', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->nullOnDelete();
-            $table->foreignId('kafedra_id')->constrained()->nullOnDelete();
             $table->json('details')->nullable();
             $table->timestamps();
         });

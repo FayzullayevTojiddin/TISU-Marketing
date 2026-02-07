@@ -4,7 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Kafedra extends Model
 {
@@ -29,8 +31,19 @@ class Kafedra extends Model
         return $this->belongsTo(Dekan::class);
     }
 
-    public function kurators(): HasMany
+    public function groups(): HasMany
     {
-        return $this->hasMany(Kurator::class);
+        return $this->hasMany(Group::class);
+    }
+
+
+    public function kurators(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Kurator::class,
+            'groups',
+            'kafedra_id',
+            'kurator_id'
+        )->distinct();
     }
 }

@@ -37,8 +37,7 @@ class DirectionsTable
                 TextColumn::make('created_at')
                     ->label('Yaratilgan')
                     ->dateTime('d.m.Y H:i')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->sortable(),
             ])
             ->filters([
                 //
