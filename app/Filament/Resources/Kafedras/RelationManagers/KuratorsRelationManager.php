@@ -5,11 +5,8 @@ namespace App\Filament\Resources\Kafedras\RelationManagers;
 use App\Filament\Resources\Kurators\KuratorResource;
 use App\Models\Student;
 use Filament\Actions\Action;
-use Filament\Actions\CreateAction;
-use Filament\Actions\EditAction;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
-use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 

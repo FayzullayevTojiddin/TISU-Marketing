@@ -13,14 +13,10 @@ class Student extends Model
         'full_name',
         'sex',
         'nationality',
-        'birth_date',
-        'from',
-        'lives',
         'passport_address',
         'image',
         'file',
         'phone_number',
-        'parents_number',
         'JSHSHR',
         'status'
     ];

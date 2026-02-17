@@ -22,13 +22,9 @@ class DatabaseSeeder extends Seeder
         $this->call([
             DekanSeeder::class,
             KafedraSeeder::class,
+            DirectionSeeder::class,
             // KuratorSeeder::class,
-            // EducationLevelSeeder::class,
-            // StudyFormSeeder::class,
-            // DirectionSeeder::class,
-            // GroupSeeder::class,
-            // StudentSeeder::class,
-            // // StudentPaymentSeeder::class,
+            GroupSeeder::class
         ]);
     }
 }

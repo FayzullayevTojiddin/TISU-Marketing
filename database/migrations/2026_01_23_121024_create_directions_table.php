@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('study_form_id')->constrained()->cascadeOnDelete();
             $table->string('title');
-            $table->bigInteger('code')->unique();
+            $table->string('code')->unique();
             $table->unsignedBigInteger('contract_price');
             $table->timestamps();
         });

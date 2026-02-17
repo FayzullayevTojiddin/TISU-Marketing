@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('groups', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('kurator_id')->constrained()->nullOnDelete();
+            $table->foreignId('kurator_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('direction_id')->constrained()->nullOnDelete();
             $table->foreignId('kafedra_id')->constrained()->nullOnDelete();
             $table->string('title')->unique();

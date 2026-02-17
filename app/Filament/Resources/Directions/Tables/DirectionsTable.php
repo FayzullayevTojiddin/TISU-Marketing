@@ -17,6 +17,7 @@ class DirectionsTable
             ->columns([
                 TextColumn::make('title')
                     ->label('Nomi')
+                    ->limit(50)
                     ->searchable()
                     ->sortable(),
 
@@ -27,12 +28,14 @@ class DirectionsTable
 
                 TextColumn::make('contract_price')
                     ->label('Kontrakt narxi')
-                    ->sortable(),
+                    ->sortable()
+                    ->formatStateUsing(fn ($state) => number_format($state, 0, '.', ' ') . ' UZS'),
 
                 TextColumn::make('groups_count')
                     ->label('Guruhlar soni')
                     ->counts('groups')
-                    ->sortable(),
+                    ->sortable()
+                    ->alignCenter(),
 
                 TextColumn::make('created_at')
                     ->label('Yaratilgan')

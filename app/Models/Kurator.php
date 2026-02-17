@@ -10,11 +10,6 @@ class Kurator extends Model
 {
     protected $fillable = [
         'user_id',
-        'details'
-    ];
-
-    protected $casts = [
-        'details' => 'array'
     ];
 
     public function user(): BelongsTo

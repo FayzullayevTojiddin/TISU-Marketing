@@ -2,11 +2,11 @@
 
 namespace App\Filament\Resources\Groups\Schemas;
 
-use App\Enums\GroupType;
 use App\Models\Dekan;
 use App\Models\Direction;
 use App\Models\EducationLevel;
 use App\Models\Kafedra;
+use App\Models\Kurator;
 use App\Models\StudyForm;
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\TextInput;
@@ -19,29 +19,27 @@ class GroupForm
     {
         return $schema
             ->components([
-                Section::make('Tashkiliy bog‘lanish')
+                Section::make("Tashkiliy bog'lanish")
                     ->schema([
                         Select::make('dekan_id')
                             ->label('Dekan')
                             ->options(Dekan::pluck('title', 'id'))
                             ->reactive()
-                            ->required()
+                            ->dehydrated(false)
                             ->afterStateHydrated(function (callable $set, $record) {
-                                if (!$record?->kurator) return;
-                                $set('dekan_id', $record->kurator->kafedra->dekan_id);
+                                if (! $record?->kafedra) return;
+                                $set('dekan_id', $record->kafedra->dekan_id);
                             }),
 
                         Select::make('kafedra_id')
                             ->label('Kafedra')
                             ->options(fn (callable $get) =>
-                                $get('dekan_id') ? Kafedra::where('dekan_id', $get('dekan_id'))->pluck('title', 'id') : []
+                                $get('dekan_id')
+                                    ? Kafedra::where('dekan_id', $get('dekan_id'))->pluck('title', 'id')
+                                    : []
                             )
                             ->reactive()
-                            ->required()
-                            ->afterStateHydrated(function (callable $set, $record) {
-                                if (!$record?->kurator) return;
-                                $set('kafedra_id', $record->kurator->kafedra_id);
-                            }),
+                            ->required(),
 
                         Select::make('kurator_id')
                             ->label('Kurator')
@@ -49,48 +47,60 @@ class GroupForm
                             ->getOptionLabelFromRecordUsing(fn ($record) => $record->user->name)
                             ->searchable()
                             ->preload()
-                            ->required(),
+                            ->nullable(),
                     ])
                     ->columns(3)
                     ->columnSpanFull(),
-                Section::make('Guruh maʼlumotlari')
+
+                Section::make("Guruh ma'lumotlari")
                     ->schema([
-                        Section::make('Guruh maʼlumotlari')
-                            ->schema([
-                                TextInput::make('title')
-                                    ->label('Guruh nomi')
-                                    ->required()
-                                    ->maxLength(255),
+                        TextInput::make('title')
+                            ->label('Guruh nomi')
+                            ->required()
+                            ->maxLength(255),
 
-                                TextInput::make('enrollment_year')
-                                    ->label('Qabul yili')
-                                    ->numeric()
-                                    ->minValue(2000)
-                                    ->maxValue(now()->year + 1)
-                                    ->required(),
-                            ]),
+                        TextInput::make('enrollment_year')
+                            ->label('Qabul yili')
+                            ->numeric()
+                            ->minValue(2000)
+                            ->maxValue(now()->year + 1)
+                            ->required(),
                     ])
-                    ->columns(1),
+                    ->columns(2),
 
-                Section::make('Taʼlim parametrlari')
+                Section::make("Ta'lim parametrlari")
                     ->schema([
                         Select::make('education_level_id')
-                            ->label('Taʼlim darajasi')
+                            ->label("Ta'lim darajasi")
                             ->options(EducationLevel::pluck('title', 'id'))
-                            ->searchable()
-                            ->preload()
-                            ->required(),
+                            ->reactive()
+                            ->dehydrated(false)
+                            ->afterStateHydrated(function (callable $set, $record) {
+                                if (! $record?->direction?->studyForm) return;
+                                $set('education_level_id', $record->direction->studyForm->education_level_id);
+                            }),
 
                         Select::make('study_form_id')
-                            ->label('Taʼlim shakli')
-                            ->options(StudyForm::pluck('title', 'id'))
-                            ->searchable()
-                            ->preload()
-                            ->required(),
+                            ->label("Ta'lim shakli")
+                            ->options(fn (callable $get) =>
+                                $get('education_level_id')
+                                    ? StudyForm::where('education_level_id', $get('education_level_id'))->pluck('title', 'id')
+                                    : []
+                            )
+                            ->reactive()
+                            ->dehydrated(false)
+                            ->afterStateHydrated(function (callable $set, $record) {
+                                if (! $record?->direction) return;
+                                $set('study_form_id', $record->direction->study_form_id);
+                            }),
 
                         Select::make('direction_id')
-                            ->label('Yo‘nalish')
-                            ->options(Direction::pluck('title', 'id'))
+                            ->label("Yo'nalish")
+                            ->options(fn (callable $get) =>
+                                $get('study_form_id')
+                                    ? Direction::where('study_form_id', $get('study_form_id'))->pluck('title', 'id')
+                                    : []
+                            )
                             ->searchable()
                             ->preload()
                             ->required(),

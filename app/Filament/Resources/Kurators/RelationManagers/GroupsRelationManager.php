@@ -5,8 +5,6 @@ namespace App\Filament\Resources\Kurators\RelationManagers;
 use App\Enums\GroupType;
 use App\Filament\Resources\Groups\GroupResource;
 use Filament\Actions\Action;
-use Filament\Actions\CreateAction;
-use Filament\Actions\EditAction;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\TextInput;
@@ -22,22 +20,7 @@ class GroupsRelationManager extends RelationManager
     {
         return $schema
             ->components([
-
-                TextInput::make('title')
-                    ->label('Guruh nomi')
-                    ->required()
-                    ->maxLength(255),
-
-                Select::make('type')
-                    ->label('Taʼlim turi')
-                    ->options(GroupType::options())
-                    ->required(),
-
-                TextInput::make('contract_price')
-                    ->label('Kontrakt narxi')
-                    ->numeric()
-                    ->default(0)
-                    ->required(),
+                //
             ]);
     }
 
@@ -49,25 +32,17 @@ class GroupsRelationManager extends RelationManager
 
                 TextColumn::make('title')
                     ->label('Guruh')
+                    ->alignCenter()
                     ->searchable(),
 
-                TextColumn::make('type')
-                    ->label('Taʼlim turi')
-                    ->formatStateUsing(fn ($state) => $state?->label()),
+                TextColumn::make('kurator.user.name')
+                    ->label("Kurator F.I.SH")
+                    ->alignCenter(),
 
                 TextColumn::make('students_count')
                     ->label('Talabalar')
                     ->counts('students')
                     ->alignCenter(),
-
-                TextColumn::make('contract_price')
-                    ->label('Kontrakt')
-                    ->money('UZS'),
-
-                TextColumn::make('created_at')
-                    ->label('Yaratilgan sana')
-                    ->dateTime('d.m.Y H:i')
-                    ->sortable(),
             ])
             ->headerActions([
 

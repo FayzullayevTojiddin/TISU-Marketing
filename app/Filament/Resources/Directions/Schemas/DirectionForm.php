@@ -22,9 +22,15 @@ class DirectionForm
                 ->preload()
                 ->required()
                 ->live()
+                ->afterStateHydrated(function (Set $set, Get $get, $record) {
+                    if ($record && $record->studyForm) {
+                        $set('education_level_id', $record->studyForm->education_level_id);
+                    }
+                })
                 ->afterStateUpdated(function (Set $set) {
                     $set('study_form_id', null);
                 })
+                ->dehydrated(false)
                 ->createOptionForm([
                     TextInput::make('title')
                         ->label('Nomi')
@@ -41,6 +47,7 @@ class DirectionForm
 
             Select::make('study_form_id')
                 ->label("Ta'lim shakli")
+                ->relationship('studyForm', 'title')
                 ->options(function (Get $get) {
                     $educationLevelId = $get('education_level_id');
                     if (! $educationLevelId) {
@@ -75,13 +82,13 @@ class DirectionForm
                 ->required()
                 ->maxLength(50)
                 ->unique(ignoreRecord: true)
-                ->columnSpan(1),
+                ->columnSpan(2),
 
             TextInput::make('title')
                 ->label("Yo'nalish nomi")
                 ->required()
                 ->maxLength(255)
-                ->columnSpan(3),
+                ->columnSpan(2),
 
             TextInput::make('contract_price')
                 ->label('Kontrakt narxi')
